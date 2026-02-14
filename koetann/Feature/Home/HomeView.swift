@@ -1,5 +1,4 @@
-//
-//  Home.swift
+//  HomeView.swift
 //  koetann
 //
 //  Created by 田中志門 on 12/21/25.
@@ -20,6 +19,7 @@ struct HomeView: View {
                     LinearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                         .frame(height: 120)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
                     Text("声で学ぶ 単語帳")
                         .font(.title2.bold())
                         .padding()
@@ -63,7 +63,7 @@ struct HomeView: View {
                         .font(.title2.bold())
                         .foregroundColor(.white)
                         .padding()
-                        .background(Circle().fill(Color.accentColor))
+                        .background(Circle().fill(viewModel.currentThemeColor))
                         .shadow(radius: 4)
                 }
                 .padding()

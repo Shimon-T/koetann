@@ -21,6 +21,10 @@ final class HomeViewModel: ObservableObject {
         return [nil] + Subject.allCases.map { Optional($0) }
     }
     
+    var currentThemeColor: Color {
+            selectedSubject?.themeColor ?? .accentColor
+        }
+    
     func select(subject: Subject?) {
         selectedSubject = subject
     }

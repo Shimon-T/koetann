@@ -28,7 +28,7 @@ struct HomeCardListView: View {
                             Image(systemName: "play.fill")
                                 .foregroundStyle(.white)
                                 .padding(10)
-                                .background(Capsule().fill(Color.accentColor))
+                                .background(Capsule().fill(book.subject.themeColor))
                         }
                         .accessibilityLabel("Start \(book.title)")
                     }

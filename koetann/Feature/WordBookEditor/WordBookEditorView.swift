@@ -162,7 +162,7 @@ extension WordBookEditorView {
                 .frame(maxWidth: .infinity)
                 .padding()
                 .font(.headline)
-                .background(canProceed ? Color.accentColor : Color.gray.opacity(0.3))
+                .background(canProceed ? (subject?.themeColor ?? Color.accentColor) : Color.gray.opacity(0.3))
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
