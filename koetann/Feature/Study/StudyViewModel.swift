@@ -13,14 +13,12 @@ final class StudyViewModel: ObservableObject {
     let wordBook: WordBook
     let mode: StudyMode
     
-    // 現在のカードのインデックス
     @Published var currentIndex = 0
-    // 入力モード用の回答テキスト
     @Published var inputText = ""
-    // 正誤判定後の状態
     @Published var isCorrect: Bool? = nil
-    // 学習完了フラグ
     @Published var isFinished = false
+    @Published var memorizedCards: [Card] = []
+    @Published var wrongCards: [Card] = []
     
     // 統計（何枚覚えたかなど）
     @Published var memorizedCount = 0
@@ -44,8 +42,8 @@ final class StudyViewModel: ObservableObject {
     // 入力モードの判定
     func checkAnswer() {
         guard let card = currentCard else { return }
-        // 答えの配列のいずれかと一致すれば正解
         let cleanedInput = inputText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         if card.answers.map({ $0.lowercased() }).contains(cleanedInput) {
             isCorrect = true
             memorizedCount += 1
@@ -55,6 +53,12 @@ final class StudyViewModel: ObservableObject {
         }
     }
 
+    func skipAnswer() {
+            isCorrect = false
+            notMemorizedCount += 1
+            nextCard()
+        }
+    
     // 次のカードへ
     func nextCard() {
         if currentIndex < wordBook.cards.count - 1 {
