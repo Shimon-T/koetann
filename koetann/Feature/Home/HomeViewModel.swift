@@ -8,9 +8,16 @@
 import Foundation
 import Combine
 import SwiftUI
+
+enum StudyMode {
+    case speech, input, flashcard
+}
+
 final class HomeViewModel: ObservableObject {
     @Published private(set) var allWordBooks: [WordBook]
-    @Published var selectedSubject: Subject? = nil // nil = All
+    @Published var selectedSubject: Subject? = nil
+    @Published var studyingBook: WordBook? = nil
+    @Published var selectedMode: StudyMode? = nil
 
     var filteredWordBooks: [WordBook] {
         guard let subject = selectedSubject else { return allWordBooks }
@@ -50,10 +57,9 @@ final class HomeViewModel: ObservableObject {
         allWordBooks.remove(atOffsets: offsets)
     }
 
-    func start(book: WordBook) {
-        // TODO: Wire up to the learning flow (voice recognition start)
-        // This will likely navigate to a StudyView with the selected book.
-        print("Start book: \(book.title)")
+    func start(book: WordBook, mode: StudyMode) {
+        self.selectedMode = mode
+        self.studyingBook = book
     }
 
     func edit(book: WordBook) {

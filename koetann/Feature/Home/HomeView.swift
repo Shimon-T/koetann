@@ -4,29 +4,36 @@
 //  Created by 田中志門 on 12/21/25.
 //
 
+//  HomeView.swift
+//  koetann
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject private var viewModel = HomeViewModel()
     @State private var showingEditor = false
+    // モード選択に必要な状態を追加
+    @State private var showModeSelection = false
+    @State private var targetBook: WordBook? = nil
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                // Top hero section (placeholder)
+                // Top hero section
                 ZStack(alignment: .leading) {
-                    LinearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        .frame(height: 120)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-
+                    LinearGradient(
+                        colors: [viewModel.currentThemeColor.opacity(0.3), viewModel.currentThemeColor.opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .frame(height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    
                     Text("声で学ぶ 単語帳")
                         .font(.title2.bold())
                         .padding()
                 }
                 .padding(.horizontal)
                 
-                // Category buttons
                 HomeScrollView(
                     subjectOptions: viewModel.subjectOptions,
                     selectedSubject: viewModel.selectedSubject,
@@ -35,27 +42,19 @@ struct HomeView: View {
                     }
                 )
                 
-                // Books list
                 HomeCardListView(
                     filteredWordBooks: viewModel.filteredWordBooks,
                     start: { book in
-                        viewModel.start(book: book)
+                        targetBook = book
+                        showModeSelection = true
                     },
                     edit: { book in
                         viewModel.edit(book: book)
                     }
                 )
-                
-            }
-            .onAppear {
-                print("HomeView appeared")
-                print("subjectOptions:", viewModel.subjectOptions)
-                print("selectedSubject:", String(describing: viewModel.selectedSubject))
-                print("filteredWordBooks count:", viewModel.filteredWordBooks.count)
             }
             .padding(.top, 30)
             .overlay(alignment: .bottomTrailing) {
-                // Floating Add (+) Button
                 Button {
                     showingEditor = true
                 } label: {
@@ -74,10 +73,30 @@ struct HomeView: View {
                     showingEditor = false
                 })
             }
+            .confirmationDialog("学習モードを選択", isPresented: $showModeSelection, titleVisibility: .visible) {
+                Button("音声モード（準備中）") { }
+                Button("入力モード") {
+                    if let book = targetBook { viewModel.start(book: book, mode: .input) }
+                }
+                Button("学習モード（カード）") {
+                    if let book = targetBook { viewModel.start(book: book, mode: .flashcard) }
+                }
+                Button("キャンセル", role: .cancel) { }
+            }
+            .fullScreenCover(item: $viewModel.studyingBook) { book in
+                let mode = viewModel.selectedMode ?? .flashcard
+                let studyVM = StudyViewModel(wordBook: book, mode: mode)
+                
+                if mode == .flashcard {
+                    FlashcardStudyView(viewModel: studyVM)
+                } else {
+                    InputStudyView(viewModel: studyVM)
+                }
+            }
         }
     }
 }
     
-//#Preview {
-//    HomeView()
-//}
+#Preview {
+    HomeView()
+}
