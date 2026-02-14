@@ -7,13 +7,12 @@
 
 import SwiftUI
 
-struct SettingView: View {
-    
+struct CommunityView: View {
     var body: some View {
-        
+        Text("Community")
     }
 }
 
 #Preview {
-    SettingView()
+    CommunityView()
 }
