@@ -30,7 +30,7 @@ extension Subject {
     
     var themeColor: Color {
         switch self {
-        case .english: return .orange
+        case .english: return .purple
         case .japanese: return .red
         case .math: return .blue
         case .science: return .green

@@ -18,6 +18,7 @@ final class HomeViewModel: ObservableObject {
     @Published var selectedSubject: Subject? = nil
     @Published var studyingBook: WordBook? = nil
     @Published var selectedMode: StudyMode? = nil
+    @Published var editingBook: WordBook? = nil
 
     var filteredWordBooks: [WordBook] {
         guard let subject = selectedSubject else { return allWordBooks }
@@ -29,7 +30,7 @@ final class HomeViewModel: ObservableObject {
     }
     
     var currentThemeColor: Color {
-            selectedSubject?.themeColor ?? .accentColor
+            selectedSubject?.themeColor ?? .orange
         }
     
     func select(subject: Subject?) {
@@ -63,10 +64,14 @@ final class HomeViewModel: ObservableObject {
     }
 
     func edit(book: WordBook) {
-        // TODO: Navigate to an edit screen for the selected book
-        print("Edit book: \(book.title)")
+        self.editingBook = book
     }
     
+    func update(book: WordBook) {
+        if let index = allWordBooks.firstIndex(where: { $0.id == book.id }) {
+            allWordBooks[index] = book
+        }
+    }
     
 }
 

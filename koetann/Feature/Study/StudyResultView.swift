@@ -5,11 +5,18 @@
 //  Created by 田中志門 on 2/15/26.
 //
 
+//  StudyResultView.swift
 import SwiftUI
 
 struct StudyResultView: View {
     @ObservedObject var viewModel: StudyViewModel
     @Environment(\.dismiss) private var dismiss
+    
+    // 正答率の計算（0.0 〜 1.0）
+    private var successRate: Double {
+        guard !viewModel.wordBook.cards.isEmpty else { return 0 }
+        return Double(viewModel.memorizedCards.count) / Double(viewModel.wordBook.cards.count)
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -17,11 +24,23 @@ struct StudyResultView: View {
                 .font(.largeTitle.bold())
                 .padding(.top)
             
-            // スコア表示
+            // スコア表示（円グラフ）
             ZStack {
+                // 背景のグレーの円
                 Circle()
                     .stroke(Color.gray.opacity(0.2), lineWidth: 15)
-                    .frame(width: 150, height: 150)
+                    .frame(width: 160, height: 160)
+                
+                // 正解率を表す青い円（ProgressViewのスタイルを利用）
+                Circle()
+                    .trim(from: 0, to: successRate) // ここで正答率とマッチさせます
+                    .stroke(
+                        viewModel.wordBook.subject.themeColor,
+                        style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                    )
+                    .frame(width: 160, height: 160)
+                    .rotationEffect(.degrees(-90)) // 真上から始まるように回転
+                    .animation(.easeOut(duration: 1.0), value: successRate) // アニメーション追加
                 
                 VStack {
                     Text("\(viewModel.memorizedCards.count)")
@@ -30,6 +49,7 @@ struct StudyResultView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .padding(.vertical, 20)
             
             // リスト表示
             List {

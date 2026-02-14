@@ -23,7 +23,7 @@ final class StudyViewModel: ObservableObject {
     // 統計（何枚覚えたかなど）
     @Published var memorizedCount = 0
     @Published var notMemorizedCount = 0
-
+    
     init(wordBook: WordBook, mode: StudyMode) {
         self.wordBook = wordBook
         self.mode = mode
@@ -38,7 +38,7 @@ final class StudyViewModel: ObservableObject {
         guard !wordBook.cards.isEmpty else { return 0 }
         return Double(currentIndex) / Double(wordBook.cards.count)
     }
-
+    
     // 入力モードの判定
     func checkAnswer() {
         guard let card = currentCard else { return }
@@ -52,12 +52,22 @@ final class StudyViewModel: ObservableObject {
             notMemorizedCount += 1
         }
     }
-
+    
     func skipAnswer() {
-            isCorrect = false
-            notMemorizedCount += 1
-            nextCard()
+        isCorrect = false
+        notMemorizedCount += 1
+        nextCard()
+    }
+    
+    func swipeCard(isMemorized: Bool) {
+        guard let card = currentCard else { return }
+        if isMemorized {
+            memorizedCards.append(card) // 右スワイプ
+        } else {
+            wrongCards.append(card)     // 左スワイプ
         }
+        nextCard()
+    }
     
     // 次のカードへ
     func nextCard() {
@@ -68,15 +78,5 @@ final class StudyViewModel: ObservableObject {
         } else {
             isFinished = true
         }
-    }
-    
-    // スワイプ判定（学習モード用）
-    func swipeCard(isMemorized: Bool) {
-        if isMemorized {
-            memorizedCount += 1
-        } else {
-            notMemorizedCount += 1
-        }
-        nextCard()
     }
 }

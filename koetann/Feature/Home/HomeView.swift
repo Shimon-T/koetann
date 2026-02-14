@@ -11,7 +11,6 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject private var viewModel = HomeViewModel()
     @State private var showingEditor = false
-    // モード選択に必要な状態を追加
     @State private var showModeSelection = false
     @State private var targetBook: WordBook? = nil
     
@@ -50,6 +49,7 @@ struct HomeView: View {
                     },
                     edit: { book in
                         viewModel.edit(book: book)
+                        showingEditor = true
                     }
                 )
             }
@@ -67,9 +67,16 @@ struct HomeView: View {
                 }
                 .padding()
             }
-            .sheet(isPresented: $showingEditor) {
-                WordBookEditorView(onSave: { newBook in
-                    viewModel.add(book: newBook)
+            .sheet(isPresented: $showingEditor, onDismiss: {
+                viewModel.editingBook = nil
+            }) {
+                
+                WordBookEditorView(onSave: { newOrUpdatedBook in
+                    if viewModel.editingBook != nil {
+                        viewModel.update(book: newOrUpdatedBook)
+                    } else {
+                        viewModel.add(book: newOrUpdatedBook)
+                    }
                     showingEditor = false
                 })
             }
