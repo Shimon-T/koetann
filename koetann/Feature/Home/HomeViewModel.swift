@@ -48,6 +48,8 @@ final class HomeViewModel: ObservableObject {
     func add(book: WordBook) {
         allWordBooks.insert(book, at: 0)
     }
+    
+    
 
     func addNewBook() {
         let new = WordBook(title: "New Book", subject: .other, createdAt: Date(), cards: [])
@@ -70,6 +72,7 @@ final class HomeViewModel: ObservableObject {
     func update(book: WordBook) {
         if let index = allWordBooks.firstIndex(where: { $0.id == book.id }) {
             allWordBooks[index] = book
+            self.editingBook = nil
         }
     }
     

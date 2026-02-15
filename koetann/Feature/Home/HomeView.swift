@@ -71,7 +71,7 @@ struct HomeView: View {
                 viewModel.editingBook = nil
             }) {
                 
-                WordBookEditorView(onSave: { newOrUpdatedBook in
+                WordBookEditorView(editingBook: viewModel.editingBook, onSave: { newOrUpdatedBook in
                     if viewModel.editingBook != nil {
                         viewModel.update(book: newOrUpdatedBook)
                     } else {
@@ -80,16 +80,18 @@ struct HomeView: View {
                     showingEditor = false
                 })
             }
-            .confirmationDialog("学習モードを選択", isPresented: $showModeSelection, titleVisibility: .visible) {
-                Button("音声モード（準備中）") { }
+            .alert("学習モード選択", isPresented: $showModeSelection) {
                 Button("入力モード") {
                     if let book = targetBook { viewModel.start(book: book, mode: .input) }
                 }
-                Button("学習モード（カード）") {
+                Button("カードモード") {
                     if let book = targetBook { viewModel.start(book: book, mode: .flashcard) }
                 }
-                Button("キャンセル", role: .cancel) { }
+                Button("キャンセル", role: .cancel) {
+                    
+                }
             }
+            
             .fullScreenCover(item: $viewModel.studyingBook) { book in
                 let mode = viewModel.selectedMode ?? .flashcard
                 let studyVM = StudyViewModel(wordBook: book, mode: mode)
@@ -102,8 +104,4 @@ struct HomeView: View {
             }
         }
     }
-}
-    
-#Preview {
-    HomeView()
 }

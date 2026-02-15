@@ -53,8 +53,7 @@ struct InputStudyView: View {
                             .font(.title.bold())
                             .foregroundColor(correct ? .green : .red)
                         }
-
-                        // 4. 大きなボタン類
+                        
                         VStack(spacing: 16) {
                             Button(action: {
                                 if viewModel.isCorrect == nil {
@@ -87,11 +86,6 @@ struct InputStudyView: View {
             }
             .navigationTitle("入力学習")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("終了") { dismiss() }
-                }
-            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("終了") { dismiss() }

@@ -15,25 +15,34 @@ enum EditorStep {
 
 struct WordBookEditorView: View {
     @Environment(\.dismiss) private var dismiss
-
-    // MARK: - Step
+    private let editingBook: WordBook?
     @State private var step: EditorStep = .words
-
-    // MARK: - Word inputs
     @State private var words: [(question: String, answer: String)] = [
         ("", "")
     ]
-
-    // MARK: - Metadata
     @State private var title: String = ""
     @State private var subject: Subject? = nil
 
-    // MARK: - Alert
     @State private var showCancelAlert = false
     @State private var showValidationAlert = false
 
-    // MARK: - Callback
     let onSave: (WordBook) -> Void
+    
+    init(editingBook: WordBook? = nil, onSave: @escaping (WordBook) -> Void) {
+        self.editingBook = editingBook
+        self.onSave = onSave
+        
+        // 編集モードなら既存データを、新規なら空のデータを初期値にセット
+        if let book = editingBook {
+            _title = State(initialValue: book.title)
+            _subject = State(initialValue: book.subject)
+            _words = State(initialValue: book.cards.map { ($0.question, $0.answers.first ?? "") })
+        } else {
+            _title = State(initialValue: "")
+            _subject = State(initialValue: nil)
+            _words = State(initialValue: [("", "")])
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,7 +50,7 @@ struct WordBookEditorView: View {
                 content
                 bottomButton
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitle(editingBook == nil ? "新規作成" : "単語帳を編集", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -130,16 +139,12 @@ extension WordBookEditorView {
             .padding()
         }
     }
-}
-
-extension WordBookEditorView {
-
+    
     private var metadataSection: some View {
         Form {
             Section("タイトル") {
                 TextField("単語帳のタイトル", text: $title)
             }
-
             Section("科目") {
                 Picker("科目", selection: $subject) {
                     Text("未設定").tag(Subject?.none)
@@ -150,26 +155,23 @@ extension WordBookEditorView {
             }
         }
     }
-}
-
-extension WordBookEditorView {
-
+    
     private var bottomButton: some View {
         Button {
             handleBottomButton()
         } label: {
-            Text(step == .words ? "次へ" : "作成する")
+            Text(step == .words ? "次へ" : (editingBook == nil ? "作成する" : "更新する"))
                 .frame(maxWidth: .infinity)
                 .padding()
                 .font(.headline)
-                .background(canProceed ? (subject?.themeColor ?? Color.accentColor) : Color.gray.opacity(0.3))
+                .background(canProceed ? (subject?.themeColor ?? .orange) : Color.gray.opacity(0.3))
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
         .padding()
         .disabled(!canProceed)
     }
-
+    
     private var canProceed: Bool {
         switch step {
         case .words:
@@ -178,50 +180,32 @@ extension WordBookEditorView {
             return !title.isEmpty
         }
     }
-}
-
-extension WordBookEditorView {
 
     private func handleBottomButton() {
         switch step {
         case .words:
-            if !words.isEmpty && words.allSatisfy({ !$0.question.isEmpty && !$0.answer.isEmpty }) {
+            if canProceed {
                 step = .metadata
             } else {
                 showValidationAlert = true
             }
-
         case .metadata:
             let cards: [Card] = words.map {
-                Card(
-                    question: $0.question,
-                    answers: [$0.answer],
-                    memo: ""
-                )
+                Card(question: $0.question, answers: [$0.answer], memo: "")
             }
-
-            let newBook = WordBook(
+            // 既存のIDと作成日を引き継ぐ
+            let updatedBook = WordBook(
+                id: editingBook?.id ?? UUID(),
                 title: title,
                 subject: subject ?? .japanese,
-                createdAt: Date(),
+                createdAt: editingBook?.createdAt ?? Date(),
                 cards: cards
             )
-
-            onSave(newBook)
+            onSave(updatedBook)
             dismiss()
         }
     }
-
     private func handleCancel() {
-        let hasInput = words.contains {
-            !$0.question.isEmpty || !$0.answer.isEmpty
-        } || !title.isEmpty
-
-        if hasInput {
-            showCancelAlert = true
-        } else {
-            dismiss()
-        }
+        dismiss()
     }
 }
-

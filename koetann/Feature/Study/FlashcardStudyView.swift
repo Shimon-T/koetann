@@ -55,21 +55,17 @@ struct CardView: View {
     var body: some View {
         ZStack {
             if isFlipped {
-                // 裏面（答え）：背景が科目色、文字が白
                 CardContent(text: card.answers.joined(separator: ", "),
-                            backgroundColor: themeColor,
-                            foregroundColor: .white,
+                            backgroundColor: currentSwipeColor,
+                            foregroundColor: offset.width == 0 ? themeColor : .white,
                             borderColor: themeColor)
             } else {
-                // 表面（問題）：背景が白、文字と枠が科目色
-                // スワイプ中は背景が色づくように調整
                 CardContent(text: card.question,
                             backgroundColor: currentSwipeColor,
                             foregroundColor: offset.width == 0 ? themeColor : .white,
                             borderColor: themeColor)
             }
             
-            // スワイプ時のマルバツアイコン
             if abs(offset.width) > 50 {
                 Image(systemName: offset.width > 0 ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .font(.system(size: 100))

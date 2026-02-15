@@ -62,9 +62,9 @@ final class StudyViewModel: ObservableObject {
     func swipeCard(isMemorized: Bool) {
         guard let card = currentCard else { return }
         if isMemorized {
-            memorizedCards.append(card) // 右スワイプ
+            memorizedCards.append(card)
         } else {
-            wrongCards.append(card)     // 左スワイプ
+            wrongCards.append(card)
         }
         nextCard()
     }
