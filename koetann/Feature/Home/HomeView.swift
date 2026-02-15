@@ -8,7 +8,6 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-    // SwiftDataから全単語帳を自動取得（作成日の新しい順）
     @Query(sort: \WordBook.createdAt, order: .reverse) private var allWordBooks: [WordBook]
     @Environment(\.modelContext) private var modelContext
     
@@ -27,7 +26,6 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                // 上部のヒーローセクション（選択中の科目の色に連動）
                 ZStack(alignment: .leading) {
                     LinearGradient(
                         colors: [viewModel.currentThemeColor.opacity(0.3), viewModel.currentThemeColor.opacity(0.1)],
@@ -55,6 +53,7 @@ struct HomeView: View {
                 // 単語帳の一覧リスト
                 HomeCardListView(
                     filteredWordBooks: filteredWordBooks,
+                    viewModel: viewModel,
                     start: { book in
                         targetBook = book
                         showModeSelection = true

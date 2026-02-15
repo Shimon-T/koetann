@@ -20,24 +20,24 @@ final class HomeViewModel: ObservableObject {
     @Published var studyingBook: WordBook? = nil
     @Published var selectedMode: StudyMode? = nil
     @Published var editingBook: WordBook? = nil
-
+    
     var filteredWordBooks: [WordBook] {
         guard let subject = selectedSubject else { return allWordBooks }
         return allWordBooks.filter { $0.subject == subject }
     }
-
+    
     var subjectOptions: [Subject?] {
         return [nil] + Subject.allCases.map { Optional($0) }
     }
     
     var currentThemeColor: Color {
-            selectedSubject?.themeColor ?? .orange
-        }
+        selectedSubject?.themeColor ?? .orange
+    }
     
     func select(subject: Subject?) {
         selectedSubject = subject
     }
-
+    
     init(wordBooks: [WordBook] = []) {
         if wordBooks.isEmpty {
             self.allWordBooks = Self.mock()
@@ -47,25 +47,25 @@ final class HomeViewModel: ObservableObject {
     }
     
     func add(book: WordBook, context: ModelContext) {
-            context.insert(book)
-            try? context.save()
-        }
-
+        context.insert(book)
+        try? context.save()
+    }
+    
     func addNewBook() {
         let new = WordBook(title: "New Book", subject: .other, createdAt: Date(), cards: [])
         allWordBooks.insert(new, at: 0)
     }
-
+    
     func remove(book: WordBook, context: ModelContext) {
         context.delete(book)
         try? context.save()
     }
-
+    
     func start(book: WordBook, mode: StudyMode) {
         self.selectedMode = mode
         self.studyingBook = book
     }
-
+    
     func edit(book: WordBook) {
         self.editingBook = book
     }
@@ -73,6 +73,15 @@ final class HomeViewModel: ObservableObject {
     func update(book: WordBook, context: ModelContext) {
         try? context.save()
         self.editingBook = nil
+    }
+    
+    func delete(book: WordBook, context: ModelContext) {
+        context.delete(book)
+        do {
+            try context.save()
+        } catch {
+            print("削除に失敗しました: \(error)")
+        }
     }
     
 }

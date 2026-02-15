@@ -5,6 +5,7 @@
 //  Created by 田中志門 on 2/15/26.
 //
 
+//  FlashcardStudyView.swift
 import SwiftUI
 
 struct FlashcardStudyView: View {
@@ -17,19 +18,53 @@ struct FlashcardStudyView: View {
                 if viewModel.isFinished {
                     StudyResultView(viewModel: viewModel)
                 } else {
-                    Color.clear // 背景確保
-                    
-                    ForEach(Array(viewModel.wordBook.cards.enumerated()), id: \.element.id) { index, card in
-                        if index >= viewModel.currentIndex {
-                            CardView(card: card, themeColor: viewModel.wordBook.subject.themeColor) { isMemorized in
-                                withAnimation(.spring()) {
-                                    viewModel.swipeCard(isMemorized: isMemorized)
+                    VStack(spacing: 0) {
+                        // MARK: - Header (進捗と正解数)
+                        VStack(spacing: 12) {
+                            // プログレスバー
+                            ProgressView(value: viewModel.progress)
+                                .tint(viewModel.wordBook.subject.themeColor)
+                                .scaleEffect(x: 1, y: 2, anchor: .center)
+                                .padding(.horizontal)
+                            
+                            HStack {
+                                // 現在の枚数表示
+                                Label("\(viewModel.currentIndex + 1) / \(viewModel.wordBook.cards.count)", systemImage: "doc.on.doc")
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                // 現在の正解数表示 (右スワイプ数)
+                                Label("\(viewModel.memorizedCards.count) 正解", systemImage: "checkmark.circle.fill")
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.vertical, 10)
+                        .background(Color(.systemBackground).shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5))
+                        
+                        Spacer()
+                        
+                        // MARK: - Card Stack
+                        ZStack {
+                            ForEach(Array(viewModel.wordBook.cards.enumerated()), id: \.element.id) { index, card in
+                                if index >= viewModel.currentIndex {
+                                    CardView(card: card, themeColor: viewModel.wordBook.subject.themeColor) { isMemorized in
+                                        withAnimation(.spring()) {
+                                            viewModel.swipeCard(isMemorized: isMemorized)
+                                        }
+                                    }
+                                    .zIndex(Double(viewModel.wordBook.cards.count - index))
+                                    .stacked(at: index, in: viewModel.wordBook.cards.count)
+                                    .allowsHitTesting(index == viewModel.currentIndex)
                                 }
                             }
-                            .zIndex(Double(viewModel.wordBook.cards.count - index))
-                            .stacked(at: index, in: viewModel.wordBook.cards.count)
-                            .allowsHitTesting(index == viewModel.currentIndex)
                         }
+                        .padding(.bottom, 40)
+                        
+                        Spacer()
                     }
                 }
             }
@@ -97,9 +132,10 @@ struct CardView: View {
         }
     }
     
-    // スワイプ中のカードの色を計算
+    // FlashcardStudyView.swift 内の currentSwipeColor プロパティ
     private var currentSwipeColor: Color {
         if offset.width > 0 {
+            // mix(with:ratio:) の形式で呼び出す
             return Color.white.mix(with: .green, ratio: min(Double(offset.width / 150), 1.0))
         } else if offset.width < 0 {
             return Color.white.mix(with: .red, ratio: min(Double(-offset.width / 150), 1.0))
@@ -117,7 +153,6 @@ struct CardView: View {
     }
 }
 
-// カードの見た目専用のView
 struct CardContent: View {
     let text: String
     let backgroundColor: Color
@@ -141,8 +176,6 @@ struct CardContent: View {
     }
 }
 
-//  FlashcardStudyView.swift の一番下
-
 // MARK: - Extensions
 extension View {
     func stacked(at index: Int, in total: Int) -> some View {
@@ -151,8 +184,10 @@ extension View {
     }
 }
 
+// koetann/Feature/Study/FlashcardStudyView.swift の一番下
+
 extension Color {
-    // iOS (UIColor) を使用して色を混ぜるメソッド
+    // 引数ラベルを明示的に指定するように修正
     func mix(with target: Color, ratio: Double) -> Color {
         let uiColor1 = UIColor(self)
         let uiColor2 = UIColor(target)
@@ -169,9 +204,5 @@ extension Color {
             blue: Double(b1 * (1 - ratio) + b2 * ratio),
             opacity: Double(a1 * (1 - ratio) + a2 * ratio)
         )
-    }
-    
-    var asColor: Color {
-        return self
     }
 }
