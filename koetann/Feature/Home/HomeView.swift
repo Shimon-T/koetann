@@ -88,10 +88,9 @@ struct HomeView: View {
             }) {
                 WordBookEditorView(editingBook: viewModel.editingBook) { newOrUpdatedBook in
                     if viewModel.editingBook != nil {
-                        // 既存データの更新（SwiftDataのモデルは参照型なので保存のみでOK）
-                        viewModel.update(book: newOrUpdatedBook)
+                        // 修正箇所：modelContext を引数に渡す
+                        viewModel.update(book: newOrUpdatedBook, context: modelContext)
                     } else {
-                        // 新規データの追加
                         modelContext.insert(newOrUpdatedBook)
                     }
                     try? modelContext.save()
