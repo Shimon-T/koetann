@@ -4,20 +4,30 @@
 //  Created by 田中志門 on 12/21/25.
 //
 
-//  HomeView.swift
-//  koetann
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
+    // SwiftDataから全単語帳を自動取得（作成日の新しい順）
+    @Query(sort: \WordBook.createdAt, order: .reverse) private var allWordBooks: [WordBook]
+    @Environment(\.modelContext) private var modelContext
+    
     @ObservedObject private var viewModel = HomeViewModel()
+    
     @State private var showingEditor = false
     @State private var showModeSelection = false
     @State private var targetBook: WordBook? = nil
     
+    // 選択された科目に基いてリストをフィルタリング
+    var filteredWordBooks: [WordBook] {
+        guard let subject = viewModel.selectedSubject else { return allWordBooks }
+        return allWordBooks.filter { $0.subject == subject }
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                // Top hero section
+                // 上部のヒーローセクション（選択中の科目の色に連動）
                 ZStack(alignment: .leading) {
                     LinearGradient(
                         colors: [viewModel.currentThemeColor.opacity(0.3), viewModel.currentThemeColor.opacity(0.1)],
@@ -33,6 +43,7 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
                 
+                // 科目選択のスライダー
                 HomeScrollView(
                     subjectOptions: viewModel.subjectOptions,
                     selectedSubject: viewModel.selectedSubject,
@@ -41,13 +52,15 @@ struct HomeView: View {
                     }
                 )
                 
+                // 単語帳の一覧リスト
                 HomeCardListView(
-                    filteredWordBooks: viewModel.filteredWordBooks,
+                    filteredWordBooks: filteredWordBooks,
                     start: { book in
                         targetBook = book
                         showModeSelection = true
                     },
                     edit: { book in
+                        // カードをタップした際に編集画面を開く
                         viewModel.edit(book: book)
                         showingEditor = true
                     }
@@ -55,7 +68,9 @@ struct HomeView: View {
             }
             .padding(.top, 30)
             .overlay(alignment: .bottomTrailing) {
+                // 新規作成ボタン
                 Button {
+                    viewModel.editingBook = nil // 編集状態をクリア
                     showingEditor = true
                 } label: {
                     Image(systemName: "plus")
@@ -67,31 +82,34 @@ struct HomeView: View {
                 }
                 .padding()
             }
+            // 単語帳作成・編集画面の表示
             .sheet(isPresented: $showingEditor, onDismiss: {
                 viewModel.editingBook = nil
             }) {
-                
-                WordBookEditorView(editingBook: viewModel.editingBook, onSave: { newOrUpdatedBook in
+                WordBookEditorView(editingBook: viewModel.editingBook) { newOrUpdatedBook in
                     if viewModel.editingBook != nil {
+                        // 既存データの更新（SwiftDataのモデルは参照型なので保存のみでOK）
                         viewModel.update(book: newOrUpdatedBook)
                     } else {
-                        viewModel.add(book: newOrUpdatedBook)
+                        // 新規データの追加
+                        modelContext.insert(newOrUpdatedBook)
                     }
+                    try? modelContext.save()
                     showingEditor = false
-                })
+                }
             }
-            .alert("学習モード選択", isPresented: $showModeSelection) {
+            // 学習モードの選択ダイアログ
+            .confirmationDialog("学習モードを選択", isPresented: $showModeSelection, titleVisibility: .visible) {
+                Button("音声モード（準備中）") { }
                 Button("入力モード") {
                     if let book = targetBook { viewModel.start(book: book, mode: .input) }
                 }
-                Button("カードモード") {
+                Button("学習モード（カード）") {
                     if let book = targetBook { viewModel.start(book: book, mode: .flashcard) }
                 }
-                Button("キャンセル", role: .cancel) {
-                    
-                }
+                Button("キャンセル", role: .cancel) { }
             }
-            
+            // 学習画面のフルスクリーン表示
             .fullScreenCover(item: $viewModel.studyingBook) { book in
                 let mode = viewModel.selectedMode ?? .flashcard
                 let studyVM = StudyViewModel(wordBook: book, mode: mode)

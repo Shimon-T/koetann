@@ -19,8 +19,6 @@ final class StudyViewModel: ObservableObject {
     @Published var isFinished = false
     @Published var memorizedCards: [Card] = []
     @Published var wrongCards: [Card] = []
-    
-    // 統計（何枚覚えたかなど）
     @Published var memorizedCount = 0
     @Published var notMemorizedCount = 0
     

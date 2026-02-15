@@ -6,19 +6,28 @@
 //
 
 import Foundation
+import SwiftData
 
-struct WordBook: Codable, Identifiable {
-      var id: UUID
-      var title: String
-      var subject: Subject
-      var createdAt: Date
-      var cards: [Card]
+@Model
+final class WordBook {
+    @Attribute(.unique) var id: UUID
+    var title: String
+    var subjectRawValue: String
+    var createdAt: Date
+    
+    @Relationship(deleteRule: .cascade)
+    var cards: [Card]
 
-      init(id: UUID = UUID(), title: String, subject: Subject, createdAt: Date, cards: [Card]) {
-          self.id = id
-          self.title = title
-          self.subject = subject
-          self.createdAt = createdAt
-          self.cards = cards
-      }
-  }
+    var subject: Subject {
+        get { Subject(rawValue: subjectRawValue) ?? .other }
+        set { subjectRawValue = newValue.rawValue }
+    }
+
+    init(id: UUID = UUID(), title: String, subject: Subject, createdAt: Date = Date(), cards: [Card] = []) {
+        self.id = id
+        self.title = title
+        self.subjectRawValue = subject.rawValue
+        self.createdAt = createdAt
+        self.cards = cards
+    }
+}

@@ -45,19 +45,19 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    func add(book: WordBook) {
-        allWordBooks.insert(book, at: 0)
-    }
-    
-    
+    func add(book: WordBook, context: ModelContext) {
+            context.insert(book)
+            try? context.save()
+        }
 
     func addNewBook() {
         let new = WordBook(title: "New Book", subject: .other, createdAt: Date(), cards: [])
         allWordBooks.insert(new, at: 0)
     }
 
-    func remove(at offsets: IndexSet) {
-        allWordBooks.remove(atOffsets: offsets)
+    func remove(book: WordBook, context: ModelContext) {
+        context.delete(book)
+        try? context.save()
     }
 
     func start(book: WordBook, mode: StudyMode) {
@@ -69,11 +69,9 @@ final class HomeViewModel: ObservableObject {
         self.editingBook = book
     }
     
-    func update(book: WordBook) {
-        if let index = allWordBooks.firstIndex(where: { $0.id == book.id }) {
-            allWordBooks[index] = book
-            self.editingBook = nil
-        }
+    func update(book: WordBook, context: ModelContext) {
+        try? context.save()
+        self.editingBook = nil
     }
     
 }

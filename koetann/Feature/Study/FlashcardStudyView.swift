@@ -18,7 +18,7 @@ struct FlashcardStudyView: View {
                     StudyResultView(viewModel: viewModel)
                 } else {
                     Color.clear // 背景確保
-
+                    
                     ForEach(Array(viewModel.wordBook.cards.enumerated()), id: \.element.id) { index, card in
                         if index >= viewModel.currentIndex {
                             CardView(card: card, themeColor: viewModel.wordBook.subject.themeColor) { isMemorized in
@@ -51,7 +51,7 @@ struct CardView: View {
     
     @State private var isFlipped = false
     @State private var offset = CGSize.zero
-
+    
     var body: some View {
         ZStack {
             if isFlipped {
@@ -96,7 +96,7 @@ struct CardView: View {
             }
         }
     }
-
+    
     // スワイプ中のカードの色を計算
     private var currentSwipeColor: Color {
         if offset.width > 0 {
@@ -106,7 +106,7 @@ struct CardView: View {
         }
         return .white
     }
-
+    
     private func completeSwipe(isMemorized: Bool) {
         withAnimation(.easeOut(duration: 0.3)) {
             offset.width = isMemorized ? 1000 : -1000

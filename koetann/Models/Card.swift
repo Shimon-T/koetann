@@ -6,14 +6,18 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Card: Identifiable, Codable {
-    let id: UUID
+@Model
+final class Card {
+    @Attribute(.unique) var id: UUID
     var question: String
     var answers: [String]
     var memo: String?
     
-    init(id: UUID = UUID(), question: String, answers: [String], memo: String) {
+    var wordBook: WordBook?
+
+    init(id: UUID = UUID(), question: String, answers: [String], memo: String? = nil) {
         self.id = id
         self.question = question
         self.answers = answers

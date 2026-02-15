@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct koetannApp: App {
@@ -13,5 +14,6 @@ struct koetannApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [WordBook.self, Card.self])
     }
 }
