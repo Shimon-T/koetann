@@ -17,7 +17,6 @@ struct HomeView: View {
     @State private var showModeSelection = false
     @State private var targetBook: WordBook? = nil
     
-    // 選択された科目に基いてリストをフィルタリング
     var filteredWordBooks: [WordBook] {
         guard let subject = viewModel.selectedSubject else { return allWordBooks }
         return allWordBooks.filter { $0.subject == subject }
@@ -26,6 +25,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
+                // 上部のヒーローセクション
                 ZStack(alignment: .leading) {
                     LinearGradient(
                         colors: [viewModel.currentThemeColor.opacity(0.3), viewModel.currentThemeColor.opacity(0.1)],
@@ -41,7 +41,6 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
                 
-                // 科目選択のスライダー
                 HomeScrollView(
                     subjectOptions: viewModel.subjectOptions,
                     selectedSubject: viewModel.selectedSubject,
@@ -50,7 +49,6 @@ struct HomeView: View {
                     }
                 )
                 
-                // 単語帳の一覧リスト
                 HomeCardListView(
                     filteredWordBooks: filteredWordBooks,
                     viewModel: viewModel,
@@ -59,7 +57,6 @@ struct HomeView: View {
                         showModeSelection = true
                     },
                     edit: { book in
-                        // カードをタップした際に編集画面を開く
                         viewModel.edit(book: book)
                         showingEditor = true
                     }
@@ -67,9 +64,8 @@ struct HomeView: View {
             }
             .padding(.top, 30)
             .overlay(alignment: .bottomTrailing) {
-                // 新規作成ボタン
                 Button {
-                    viewModel.editingBook = nil // 編集状態をクリア
+                    viewModel.editingBook = nil
                     showingEditor = true
                 } label: {
                     Image(systemName: "plus")
@@ -81,13 +77,11 @@ struct HomeView: View {
                 }
                 .padding()
             }
-            // 単語帳作成・編集画面の表示
             .sheet(isPresented: $showingEditor, onDismiss: {
                 viewModel.editingBook = nil
             }) {
                 WordBookEditorView(editingBook: viewModel.editingBook) { newOrUpdatedBook in
                     if viewModel.editingBook != nil {
-                        // 修正箇所：modelContext を引数に渡す
                         viewModel.update(book: newOrUpdatedBook, context: modelContext)
                     } else {
                         modelContext.insert(newOrUpdatedBook)
@@ -96,7 +90,6 @@ struct HomeView: View {
                     showingEditor = false
                 }
             }
-            // 学習モードの選択ダイアログ
             .confirmationDialog("学習モードを選択", isPresented: $showModeSelection, titleVisibility: .visible) {
                 Button("音声モード") {
                     if let book = targetBook { viewModel.start(book: book, mode: .speech) }
@@ -109,19 +102,27 @@ struct HomeView: View {
                 }
                 Button("キャンセル", role: .cancel) { }
             }
-            // 学習画面のフルスクリーン表示
+            // 学習画面の表示ロジックを最新データに対応
+
+            // koetann/Feature/Home/HomeView.swift
+
             .fullScreenCover(item: $viewModel.studyingBook) { book in
+                // Queryから常に最新のインスタンスを引き直す
+                let latestBook = allWordBooks.first(where: { $0.id == book.id }) ?? book
                 let mode = viewModel.selectedMode ?? .flashcard
-                let studyVM = StudyViewModel(wordBook: book, mode: mode)
+                let studyVM = StudyViewModel(wordBook: latestBook, mode: mode)
                 
-                switch mode {
-                case .flashcard:
-                    FlashcardStudyView(viewModel: studyVM)
-                case .input:
-                    InputStudyView(viewModel: studyVM)
-                case .speech:
-                    SpeechStudyView(viewModel: studyVM)
+                Group {
+                    if mode == .speech {
+                        SpeechStudyView(viewModel: studyVM)
+                    } else if mode == .flashcard {
+                        FlashcardStudyView(viewModel: studyVM)
+                    } else {
+                        InputStudyView(viewModel: studyVM)
+                    }
                 }
+                // ここが重要！ IDが変わる（またはタイトルの更新など）とViewを強制リフレッシュする
+                .id("\(latestBook.id)-\(latestBook.title)-\(latestBook.cards.count)")
             }
         }
     }

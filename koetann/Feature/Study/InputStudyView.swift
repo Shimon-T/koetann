@@ -46,27 +46,24 @@ struct InputStudyView: View {
                                 .onSubmit { viewModel.checkAnswer() }
                             
                             // 正誤表示
+                            // koetann/Feature/Study/InputStudyView.swift
+
                             if let correct = viewModel.isCorrect {
-                                HStack {
-                                    Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                    Text(correct ? "正解！" : "不正解")
-                                }
-                                .font(.title.bold())
-                                .foregroundColor(correct ? .green : .red)
-                            }
-                            
-                            // 不正解時に正解を表示
-                            if viewModel.isCorrect == false {
                                 VStack(spacing: 8) {
-                                    Text("正解")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text(viewModel.currentCorrectAnswers.joined(separator: ", "))
-                                        .font(.title3.bold())
-                                        .multilineTextAlignment(.center)
+                                    HStack {
+                                        Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        Text(correct ? "正解！" : "不正解")
+                                    }
+                                    .font(.title.bold())
+                                    .foregroundColor(correct ? .green : .red)
+                                    
+                                    // 不正解だった場合に正解を表示する
+                                    if !correct {
+                                        Text("正解は: \(viewModel.currentCorrectAnswers)")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
+                                    }
                                 }
-                                .padding(.horizontal)
-                                .transition(.opacity)
                             }
                             
                             VStack(spacing: 16) {

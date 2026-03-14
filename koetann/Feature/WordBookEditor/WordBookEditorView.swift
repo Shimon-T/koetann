@@ -183,26 +183,29 @@ extension WordBookEditorView {
 
     private func handleBottomButton() {
         switch step {
-        case .words:
-            if canProceed {
-                step = .metadata
-            } else {
-                showValidationAlert = true
-            }
         case .metadata:
-            let cards: [Card] = words.map {
-                Card(question: $0.question, answers: [$0.answer], memo: "")
+            guard !title.isEmpty else { return }
+            
+            if let existingBook = editingBook {
+                existingBook.title = title
+                existingBook.subject = subject ?? .other
+                existingBook.cards = words.map { word in
+                    Card(question: word.question, answers: [word.answer])
+                }
+                
+                onSave(existingBook)
+            } else {
+                let newBook = WordBook(
+                    title: title,
+                    subject: subject ?? .other,
+                    cards: words.map { Card(question: $0.question, answers: [$0.answer]) }
+                )
+                onSave(newBook)
             }
-            // 既存のIDと作成日を引き継ぐ
-            let updatedBook = WordBook(
-                id: editingBook?.id ?? UUID(),
-                title: title,
-                subject: subject ?? .japanese,
-                createdAt: editingBook?.createdAt ?? Date(),
-                cards: cards
-            )
-            onSave(updatedBook)
             dismiss()
+            
+        case .words:
+            step = .metadata
         }
     }
     private func handleCancel() {

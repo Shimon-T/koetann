@@ -65,7 +65,6 @@ struct SpeechStudyView: View {
                     Button("終了") { dismiss() }
                 }
             }
-            .onAppear { viewModel.refreshFromWordBook() }
             .task { await startIfNeeded() }
         }
     }

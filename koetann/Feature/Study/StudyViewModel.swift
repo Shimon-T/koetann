@@ -1,16 +1,11 @@
-//
 //  StudyViewModel.swift
-//  koetann
-//
-//  Created by 田中志門 on 2/15/26.
-//
-
 import Foundation
 import SwiftUI
 import Combine
 
 final class StudyViewModel: ObservableObject {
-    let wordBook: WordBook
+    // @Published を付けて、データの変更を View に通知できるようにする
+    @Published var wordBook: WordBook
     let mode: StudyMode
     
     @Published var currentIndex = 0
@@ -22,86 +17,85 @@ final class StudyViewModel: ObservableObject {
     @Published var memorizedCount = 0
     @Published var notMemorizedCount = 0
     
-    // 現在のカードの正解（複数可）
-    var currentCorrectAnswers: [String] {
-        currentCard?.answers ?? []
-    }
-    
-    // 判定済みかどうか（正誤が確定しているか）
-    var hasJudged: Bool {
-        isCorrect != nil
-    }
-    
     init(wordBook: WordBook, mode: StudyMode) {
         self.wordBook = wordBook
         self.mode = mode
     }
     
+    // 計算プロパティにして、常に最新の cards 配列を返すようにする
+    var cards: [Card] {
+        wordBook.cards
+    }
+    
+    func refresh(){
+        objectWillChange.send()
+    }
+    
     var currentCard: Card? {
-        guard currentIndex < wordBook.cards.count else { return nil }
-        return wordBook.cards[currentIndex]
+        guard currentIndex < cards.count else { return nil }
+        return cards[currentIndex]
     }
     
     var progress: Double {
-        guard !wordBook.cards.isEmpty else { return 0 }
-        return Double(currentIndex) / Double(wordBook.cards.count)
+        guard !cards.isEmpty else { return 0 }
+        return Double(currentIndex) / Double(cards.count)
     }
+  
     
     // 入力モードの判定
     func checkAnswer() {
         guard let card = currentCard else { return }
         let cleanedInput = inputText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        
         if card.answers.map({ $0.lowercased() }).contains(cleanedInput) {
             isCorrect = true
             memorizedCount += 1
+            memorizedCards.append(card)
         } else {
             isCorrect = false
             notMemorizedCount += 1
+            wrongCards.append(card)
         }
     }
     
+    func refreshFromWordBook() {
+            objectWillChange.send()
+    }
+    
+    var currentCorrectAnswers: String {
+            currentCard?.answers.joined(separator: ", ") ?? ""
+    }
+    
     func skipAnswer() {
+        if let card = currentCard {
+            wrongCards.append(card)
+        }
         isCorrect = false
         notMemorizedCount += 1
-        // UI 側で正解を表示し、ユーザー操作で次へ進む
+        nextCard()
     }
     
     func swipeCard(isMemorized: Bool) {
         guard let card = currentCard else { return }
         if isMemorized {
             memorizedCards.append(card)
+            memorizedCount += 1
         } else {
             wrongCards.append(card)
+            notMemorizedCount += 1
         }
         nextCard()
     }
     
     // 次のカードへ
     func nextCard() {
-        if currentIndex < wordBook.cards.count - 1 {
+        if currentIndex < cards.count - 1 {
             currentIndex += 1
             inputText = ""
             isCorrect = nil
         } else {
             isFinished = true
         }
-    }
-    
-    // 最新の WordBook 状態に合わせて進行状況を補正
-    func refreshFromWordBook() {
-        let count = wordBook.cards.count
-        if count == 0 {
-            currentIndex = 0
-            isFinished = true
-            inputText = ""
-            isCorrect = nil
-            return
-        }
-        if currentIndex >= count {
-            currentIndex = max(0, count - 1)
-            isFinished = false
-        }
-        // 進行中の判定状態は維持
     }
 }

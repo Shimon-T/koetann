@@ -19,23 +19,18 @@ struct FlashcardStudyView: View {
                     StudyResultView(viewModel: viewModel)
                 } else {
                     VStack(spacing: 0) {
-                        // MARK: - Header (進捗と正解数)
+                        // Header: 進捗と正解数
                         VStack(spacing: 12) {
-                            // プログレスバー
                             ProgressView(value: viewModel.progress)
                                 .tint(viewModel.wordBook.subject.themeColor)
                                 .scaleEffect(x: 1, y: 2, anchor: .center)
                                 .padding(.horizontal)
                             
                             HStack {
-                                // 現在の枚数表示
-                                Label("\(viewModel.currentIndex + 1) / \(viewModel.wordBook.cards.count)", systemImage: "doc.on.doc")
+                                Label("\(viewModel.currentIndex + 1) / \(viewModel.cards.count)", systemImage: "doc.on.doc")
                                     .font(.subheadline.bold())
                                     .foregroundColor(.secondary)
-                                
                                 Spacer()
-                                
-                                // 現在の正解数表示 (右スワイプ数)
                                 Label("\(viewModel.memorizedCards.count) 正解", systemImage: "checkmark.circle.fill")
                                     .font(.subheadline.bold())
                                     .foregroundColor(.green)
@@ -43,21 +38,20 @@ struct FlashcardStudyView: View {
                             .padding(.horizontal)
                         }
                         .padding(.vertical, 10)
-                        .background(Color(.systemBackground).shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5))
                         
                         Spacer()
                         
-                        // MARK: - Card Stack
+                        // Card Stack
                         ZStack {
-                            ForEach(Array(viewModel.wordBook.cards.enumerated()), id: \.element.id) { index, card in
+                            ForEach(Array(viewModel.cards.enumerated()), id: \.element.id) { index, card in
                                 if index >= viewModel.currentIndex {
                                     CardView(card: card, themeColor: viewModel.wordBook.subject.themeColor) { isMemorized in
                                         withAnimation(.spring()) {
                                             viewModel.swipeCard(isMemorized: isMemorized)
                                         }
                                     }
-                                    .zIndex(Double(viewModel.wordBook.cards.count - index))
-                                    .stacked(at: index, in: viewModel.wordBook.cards.count)
+                                    .zIndex(Double(viewModel.cards.count - index))
+                                    .stacked(at: index, in: viewModel.cards.count)
                                     .allowsHitTesting(index == viewModel.currentIndex)
                                 }
                             }
@@ -68,7 +62,6 @@ struct FlashcardStudyView: View {
                     }
                 }
             }
-            .onAppear { viewModel.refreshFromWordBook() }
             .navigationTitle(viewModel.wordBook.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -76,9 +69,13 @@ struct FlashcardStudyView: View {
                     Button("終了") { dismiss() }
                 }
             }
+            .onAppear {
+                viewModel.refreshFromWordBook()
+            }
         }
     }
 }
+
 
 struct CardView: View {
     let card: Card
