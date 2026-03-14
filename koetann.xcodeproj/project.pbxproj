@@ -10,9 +10,22 @@
 		2E2D12052EF7C3B100330CBF /* koetann.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = koetann.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2EC59DEE2F6540230032984C /* Exceptions for "koetann" folder in "koetann" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2E2D12042EF7C3B100330CBF /* koetann */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2E2D12072EF7C3B100330CBF /* koetann */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2EC59DEE2F6540230032984C /* Exceptions for "koetann" folder in "koetann" target */,
+			);
 			path = koetann;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,9 @@
 				DEVELOPMENT_TEAM = 68ZU9ZC9LN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = koetann/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "音声モードであなたの回答を認識するためにマイクを使用します。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "あなたの声をテキストに変換して正解判定を行うために音声認識を使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -287,6 +303,9 @@
 				DEVELOPMENT_TEAM = 68ZU9ZC9LN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = koetann/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "音声モードであなたの回答を認識するためにマイクを使用します。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "あなたの声をテキストに変換して正解判定を行うために音声認識を使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

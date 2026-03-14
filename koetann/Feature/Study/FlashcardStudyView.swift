@@ -68,6 +68,7 @@ struct FlashcardStudyView: View {
                     }
                 }
             }
+            .onAppear { viewModel.refreshFromWordBook() }
             .navigationTitle(viewModel.wordBook.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

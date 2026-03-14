@@ -22,6 +22,16 @@ final class StudyViewModel: ObservableObject {
     @Published var memorizedCount = 0
     @Published var notMemorizedCount = 0
     
+    // 現在のカードの正解（複数可）
+    var currentCorrectAnswers: [String] {
+        currentCard?.answers ?? []
+    }
+    
+    // 判定済みかどうか（正誤が確定しているか）
+    var hasJudged: Bool {
+        isCorrect != nil
+    }
+    
     init(wordBook: WordBook, mode: StudyMode) {
         self.wordBook = wordBook
         self.mode = mode
@@ -54,7 +64,7 @@ final class StudyViewModel: ObservableObject {
     func skipAnswer() {
         isCorrect = false
         notMemorizedCount += 1
-        nextCard()
+        // UI 側で正解を表示し、ユーザー操作で次へ進む
     }
     
     func swipeCard(isMemorized: Bool) {
@@ -76,5 +86,22 @@ final class StudyViewModel: ObservableObject {
         } else {
             isFinished = true
         }
+    }
+    
+    // 最新の WordBook 状態に合わせて進行状況を補正
+    func refreshFromWordBook() {
+        let count = wordBook.cards.count
+        if count == 0 {
+            currentIndex = 0
+            isFinished = true
+            inputText = ""
+            isCorrect = nil
+            return
+        }
+        if currentIndex >= count {
+            currentIndex = max(0, count - 1)
+            isFinished = false
+        }
+        // 進行中の判定状態は維持
     }
 }

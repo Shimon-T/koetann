@@ -98,7 +98,9 @@ struct HomeView: View {
             }
             // 学習モードの選択ダイアログ
             .confirmationDialog("学習モードを選択", isPresented: $showModeSelection, titleVisibility: .visible) {
-                Button("音声モード（準備中）") { }
+                Button("音声モード") {
+                    if let book = targetBook { viewModel.start(book: book, mode: .speech) }
+                }
                 Button("入力モード") {
                     if let book = targetBook { viewModel.start(book: book, mode: .input) }
                 }
@@ -112,10 +114,13 @@ struct HomeView: View {
                 let mode = viewModel.selectedMode ?? .flashcard
                 let studyVM = StudyViewModel(wordBook: book, mode: mode)
                 
-                if mode == .flashcard {
+                switch mode {
+                case .flashcard:
                     FlashcardStudyView(viewModel: studyVM)
-                } else {
+                case .input:
                     InputStudyView(viewModel: studyVM)
+                case .speech:
+                    SpeechStudyView(viewModel: studyVM)
                 }
             }
         }

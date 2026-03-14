@@ -55,6 +55,20 @@ struct InputStudyView: View {
                                 .foregroundColor(correct ? .green : .red)
                             }
                             
+                            // 不正解時に正解を表示
+                            if viewModel.isCorrect == false {
+                                VStack(spacing: 8) {
+                                    Text("正解")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(viewModel.currentCorrectAnswers.joined(separator: ", "))
+                                        .font(.title3.bold())
+                                        .multilineTextAlignment(.center)
+                                }
+                                .padding(.horizontal)
+                                .transition(.opacity)
+                            }
+                            
                             VStack(spacing: 16) {
                                 Button(action: {
                                     if viewModel.isCorrect == nil {
@@ -74,7 +88,9 @@ struct InputStudyView: View {
                                 .disabled(viewModel.inputText.isEmpty)
                                 
                                 Button("わからない") {
-                                    viewModel.skipAnswer()
+                                    if viewModel.isCorrect == nil {
+                                        viewModel.skipAnswer()
+                                    }
                                 }
                                 .font(.headline)
                                 .foregroundColor(.secondary)
@@ -82,6 +98,7 @@ struct InputStudyView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .animation(.default, value: viewModel.isCorrect)
                     }
                     Spacer()
                 }
@@ -96,3 +113,4 @@ struct InputStudyView: View {
         }
     }
 }
+
